@@ -163,7 +163,7 @@ export default function Analysis() {
 
       <div className="mt-8 flex justify-center">
         <Link 
-          to="/chat" 
+          to={`/chat?report_id=${id}`} 
           className="bg-gradient-to-r from-brand-indigo to-brand-cyan text-brand-dark font-black py-4 px-10 rounded-xl shadow-lg shadow-brand-indigo/15 hover:shadow-brand-indigo/30 transition-all duration-300 flex items-center gap-2.5 text-sm"
         >
           <MessageSquare size={18} /> Discuss Report Findings With Assistant

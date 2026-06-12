@@ -1,24 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
-import { Send, User as UserIcon, Bot, MessageSquare, ShieldAlert } from 'lucide-react';
+import { Send, User as UserIcon, Bot, MessageSquare, ShieldAlert, FileText } from 'lucide-react';
 
 export default function Chat() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialReportId = searchParams.get('report_id') || '';
+
   const [messages, setMessages] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
+  const [selectedReportId, setSelectedReportId] = useState<string>(initialReportId);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
+  // Fetch reports list on mount
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const res = await api.get('/reports/');
+        setReports(res.data);
+      } catch (err) {
+        console.error('Failed to fetch reports list:', err);
+      }
+    };
+    fetchReports();
+  }, []);
+
+  // Fetch chat history whenever selected report context changes
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await api.get('/chat');
+        const url = selectedReportId ? `/chat?report_id=${selectedReportId}` : '/chat';
+        const res = await api.get(url);
         setMessages(res.data);
       } catch (err) {
-        console.error(err);
+        console.error('Failed to fetch chat history:', err);
       }
     };
     fetchHistory();
-  }, []);
+  }, [selectedReportId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -34,7 +55,11 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      const res = await api.post('/chat', { message: userMsg.message });
+      const payload = {
+        message: userMsg.message,
+        report_id: selectedReportId ? parseInt(selectedReportId) : null
+      };
+      const res = await api.post('/chat', payload);
       setMessages(prev => [...prev, res.data]);
     } catch (err) {
       console.error(err);
@@ -46,7 +71,7 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)] glass-card rounded-2xl border border-slate-800/80 max-w-4xl mx-auto overflow-hidden shadow-2xl animate-fade-in">
       {/* Chat header */}
-      <div className="p-5 border-b border-slate-800/60 bg-slate-900/40 flex justify-between items-center">
+      <div className="p-5 border-b border-slate-800/60 bg-slate-900/40 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-brand-cyan/15 p-2 rounded-xl text-brand-cyan">
             <Bot className="h-5 w-5" />
@@ -62,6 +87,27 @@ export default function Chat() {
             <p className="text-[11px] text-slate-400 mt-0.5">Discuss your clinical reports and clarify biomarkers</p>
           </div>
         </div>
+
+        {/* Report context selector */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <FileText size={14} className="text-slate-400" />
+          <span className="text-xs text-slate-400 font-semibold">Context:</span>
+          <select
+            value={selectedReportId}
+            onChange={(e) => {
+              setSelectedReportId(e.target.value);
+              setSearchParams(e.target.value ? { report_id: e.target.value } : {});
+            }}
+            className="bg-brand-dark border border-slate-800 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:border-brand-cyan focus:outline-none transition-all cursor-pointer"
+          >
+            <option value="">General Consultation (No Report)</option>
+            {reports.map((report) => (
+              <option key={report.id} value={report.id}>
+                {report.filename} ({new Date(report.uploaded_at).toLocaleDateString()})
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Messages Pane */}
@@ -74,7 +120,9 @@ export default function Chat() {
             <div className="space-y-1">
               <h3 className="text-slate-300 text-sm font-bold">Start Consultation</h3>
               <p className="text-slate-500 text-xs leading-relaxed">
-                Ask simple questions like: "What does my high cholesterol mean?" or "Explain the glucose levels in my last report."
+                {selectedReportId 
+                  ? "Ask specific questions about this medical report. The AI has access to its full contents."
+                  : "Ask simple questions like: \"What does my high cholesterol mean?\" or select a report context above to discuss its findings."}
               </p>
             </div>
           </div>
@@ -121,7 +169,7 @@ export default function Chat() {
           <input
             type="text"
             className="flex-1 px-5 py-3.5 bg-brand-navy/60 border border-slate-850 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent text-slate-100 placeholder-slate-500 transition-all text-sm"
-            placeholder="Ask a medical query..."
+            placeholder={selectedReportId ? "Ask about this report..." : "Ask a medical query..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
