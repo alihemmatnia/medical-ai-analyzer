@@ -102,6 +102,20 @@ Open a new terminal window and navigate to the frontend directory:
    ```
    The frontend will be running at `http://localhost:5173`.
 
+### 5. Running with Docker Compose (Alternative)
+
+For easy local or VPS production-like deployment:
+
+1. Ensure your `.env` file contains your credentials (especially `OPENAI_API_KEY`).
+2. Run the following command in the root folder:
+   ```bash
+   docker compose up --build -d
+   ```
+3. Once the build completes:
+   - Access the **Frontend Web App** at `http://localhost` (port 80).
+   * Access the **Backend API docs** at `http://localhost:8000/docs`.
+   * SQLite files and uploaded reports are persisted in `./storage` on your host machine.
+
 ## Folder Structure
 
 ```text
