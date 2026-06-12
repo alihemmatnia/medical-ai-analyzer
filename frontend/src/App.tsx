@@ -8,6 +8,7 @@ import UploadReport from './pages/UploadReport';
 import Analysis from './pages/Analysis';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
+import Compare from './pages/Compare';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -30,6 +31,7 @@ function App() {
           <Route path="analysis/:id" element={<Analysis />} />
           <Route path="chat" element={<Chat />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="compare" element={<Compare />} />
         </Route>
       </Routes>
     </BrowserRouter>

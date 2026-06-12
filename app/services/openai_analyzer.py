@@ -83,3 +83,42 @@ def chat_with_assistant(history: list, new_message: str, report_text: str = None
         return response.choices[0].message.content
     except Exception as e:
         return "I'm sorry, I'm having trouble analyzing your request right now."
+
+def compare_medical_reports(report_text_1: str, report_text_2: str):
+    client = get_client()
+    if not client:
+        return None
+        
+    prompt = f"""
+    You are an expert AI medical assistant. Compare the following two medical reports for the same patient (Report 1 is the earlier/older report, and Report 2 is the newer/recent report) and analyze the differences, trends, and health progression.
+    
+    Report 1 (Earlier/Older):
+    {report_text_1}
+    
+    Report 2 (Newer/Recent):
+    {report_text_2}
+    
+    Output JSON structure exactly like this:
+    {{
+      "improved_metrics": ["e.g. Hemoglobin (from 11.2 to 13.5 g/dL)", "LDL Cholesterol (from 150 to 120 mg/dL)"],
+      "worsened_metrics": ["e.g. Fasting Glucose (from 95 to 115 mg/dL)"],
+      "stable_metrics": ["e.g. Creatinine (remained at 0.9 mg/dL)"],
+      "ai_summary": "A detailed explanation of the progress, highlighting what has improved or worsened, lifestyle changes that might have contributed, and key recommendations to discuss with their physician."
+    }}
+    Do NOT include any markdown formatting, just return raw JSON.
+    """
+    
+    try:
+        response = client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a medical data comparison API that only outputs raw JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={ "type": "json_object" }
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        print(f"Error with OpenAI API during comparison: {e}")
+        return None
+

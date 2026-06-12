@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Activity, FileText, MessageSquare, User, LogOut, ShieldAlert } from 'lucide-react';
+import { Activity, FileText, MessageSquare, User, LogOut, ShieldAlert, GitCompare } from 'lucide-react';
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function Layout() {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: Activity },
     { name: 'Upload Report', path: '/upload', icon: FileText },
+    { name: 'Compare Reports', path: '/compare', icon: GitCompare },
     { name: 'AI Chat', path: '/chat', icon: MessageSquare },
     { name: 'Profile', path: '/profile', icon: User },
   ];

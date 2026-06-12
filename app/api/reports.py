@@ -94,10 +94,30 @@ def analyze_report(report_id: int, db: Session = Depends(get_db), current_user: 
 
 @router.post("/compare", response_model=schemas.CompareResponse)
 def compare_reports(req: schemas.CompareRequest, db: Session = Depends(get_db), current_user: models.User = Depends(deps.get_current_user)):
-    # Placeholder for comparing logic using OpenAI or simple diff
+    report_1 = db.query(models.Report).filter(models.Report.id == req.report_id_1, models.Report.user_id == current_user.id).first()
+    report_2 = db.query(models.Report).filter(models.Report.id == req.report_id_2, models.Report.user_id == current_user.id).first()
+    
+    if not report_1 or not report_2:
+        raise HTTPException(status_code=404, detail="One or both reports not found")
+        
+    # Sort them chronologically (older is 1, newer is 2)
+    if report_1.uploaded_at > report_2.uploaded_at:
+        older = report_2
+        newer = report_1
+    else:
+        older = report_1
+        newer = report_2
+        
+    text_1 = older.extracted_text or ""
+    text_2 = newer.extracted_text or ""
+    
+    comparison_data = openai_analyzer.compare_medical_reports(text_1, text_2)
+    if not comparison_data:
+        raise HTTPException(status_code=500, detail="Error performing comparison analysis")
+        
     return schemas.CompareResponse(
-        improved_metrics=[],
-        worsened_metrics=[],
-        stable_metrics=[],
-        ai_summary="Comparison analysis pending implementation."
+        improved_metrics=comparison_data.get("improved_metrics", []),
+        worsened_metrics=comparison_data.get("worsened_metrics", []),
+        stable_metrics=comparison_data.get("stable_metrics", []),
+        ai_summary=comparison_data.get("ai_summary", "Comparison completed.")
     )
