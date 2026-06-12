@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-dark: #070a13;
+  --color-brand-navy: #0c1222;
+  --color-brand-panel: #131b2f;
+  --color-brand-border: #1e293b;
+  --color-brand-cyan: #06b6d4;
+  --color-brand-emerald: #10b981;
+  --color-brand-indigo: #6366f1;
+  --color-brand-purple: #a855f7;
+  --color-brand-rose: #f43f5e;
+  --color-brand-amber: #f59e0b;
+
+  --shadow-glow-cyan: 0 0 15px rgba(6, 182, 212, 0.15);
+  --shadow-glow-indigo: 0 0 15px rgba(99, 102, 241, 0.15);
+  --shadow-glow-purple: 0 0 15px rgba(168, 85, 247, 0.15);
+}
+
+@layer base {
+  body {
+    background-color: #070a13;
+    color: #cbd5e1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  /* Custom glass scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(7, 10, 19, 0.5);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.4);
+  }
+}
+
+/* Glassmorphism custom classes */
+.glass-card {
+  background: rgba(19, 27, 47, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel {
+  background: rgba(12, 18, 34, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.45);
+}
+
+.text-glow-indigo {
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.45);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s infinite ease-in-out;
+}
+
+
