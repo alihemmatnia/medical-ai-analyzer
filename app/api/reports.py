@@ -100,16 +100,8 @@ def compare_reports(req: schemas.CompareRequest, db: Session = Depends(get_db), 
     if not report_1 or not report_2:
         raise HTTPException(status_code=404, detail="One or both reports not found")
         
-    # Sort them chronologically (older is 1, newer is 2)
-    if report_1.uploaded_at > report_2.uploaded_at:
-        older = report_2
-        newer = report_1
-    else:
-        older = report_1
-        newer = report_2
-        
-    text_1 = older.extracted_text or ""
-    text_2 = newer.extracted_text or ""
+    text_1 = report_1.extracted_text or ""
+    text_2 = report_2.extracted_text or ""
     
     comparison_data = openai_analyzer.compare_medical_reports(text_1, text_2)
     if not comparison_data:

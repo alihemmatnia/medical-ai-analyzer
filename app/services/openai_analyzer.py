@@ -90,12 +90,14 @@ def compare_medical_reports(report_text_1: str, report_text_2: str):
         return None
         
     prompt = f"""
-    You are an expert AI medical assistant. Compare the following two medical reports for the same patient (Report 1 is the earlier/older report, and Report 2 is the newer/recent report) and analyze the differences, trends, and health progression.
+    You are an expert AI medical assistant. Compare the following two medical reports for the same patient and analyze the differences, trends, and health progression.
     
-    Report 1 (Earlier/Older):
+    IMPORTANT: Identify the date or timestamp of each report from their texts. You must determine which report is actually earlier (older) and which is later (newer) based on their internal document dates. Then, analyze the health progression and metric changes chronologically FROM the older report TO the newer report.
+    
+    Report 1:
     {report_text_1}
     
-    Report 2 (Newer/Recent):
+    Report 2:
     {report_text_2}
     
     Output JSON structure exactly like this:
@@ -103,7 +105,7 @@ def compare_medical_reports(report_text_1: str, report_text_2: str):
       "improved_metrics": ["e.g. Hemoglobin (from 11.2 to 13.5 g/dL)", "LDL Cholesterol (from 150 to 120 mg/dL)"],
       "worsened_metrics": ["e.g. Fasting Glucose (from 95 to 115 mg/dL)"],
       "stable_metrics": ["e.g. Creatinine (remained at 0.9 mg/dL)"],
-      "ai_summary": "A detailed explanation of the progress, highlighting what has improved or worsened, lifestyle changes that might have contributed, and key recommendations to discuss with their physician."
+      "ai_summary": "A detailed explanation of the progress, highlighting what has improved or worsened, lifestyle changes that might have contributed, and key recommendations to discuss with their physician. In your summary, clearly mention the dates of both reports to orient the patient."
     }}
     Do NOT include any markdown formatting, just return raw JSON.
     """
