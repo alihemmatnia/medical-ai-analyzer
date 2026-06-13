@@ -39,6 +39,7 @@ class Analysis(Base):
     findings = Column(Text)
     urgency = Column(String) # Normal, Low, Medium, High
     health_score = Column(Float)
+    language = Column(String, default="en", nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     report = relationship("Report", back_populates="analysis")
@@ -52,6 +53,7 @@ class LabValue(Base):
     value = Column(String)
     reference_range = Column(String, nullable=True)
     unit = Column(String, nullable=True)
+    language = Column(String, default="en", nullable=False)
 
     report = relationship("Report", back_populates="lab_values")
 

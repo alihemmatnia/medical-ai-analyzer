@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { UploadCloud, FileText, ArrowLeft, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function UploadReport() {
   const [file, setFile] = useState<File | null>(null);
@@ -10,6 +11,7 @@ export default function UploadReport() {
   const [step, setStep] = useState(0); // 0: idle, 1: uploading, 2: ocr, 3: ai analysis
   const [dragActive, setDragActive] = useState(false);
   const navigate = useNavigate();
+  const { t, direction } = useLanguage();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -58,32 +60,32 @@ export default function UploadReport() {
       console.error(err);
       clearTimeout(timer1);
       clearTimeout(timer2);
-      alert('Failed to upload file');
+      alert(t('upload.errorUpload'));
       setUploading(false);
       setStep(0);
     }
   };
 
   const steps = [
-    "Uploading report to server...",
-    "Extracting laboratory text & values (OCR)...",
-    "Running AI biomarker trend analyzer...",
-    "Analysis completed!"
+    t('upload.steps.0'),
+    t('upload.steps.1'),
+    t('upload.steps.2'),
+    t('upload.steps.3')
   ];
 
   return (
     <div className="max-w-2xl mx-auto mt-6 pb-10">
       <Link to="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-200 text-xs font-semibold uppercase tracking-wider mb-6 group transition-colors">
-        <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" /> Back to Dashboard
+        <ArrowLeft size={14} className={`transition-transform ${direction === 'rtl' ? 'group-hover:translate-x-0.5' : 'group-hover:-translate-x-0.5'}`} /> {t('common.backToDashboard')}
       </Link>
 
       <div className="glass-card p-8 rounded-2xl border border-slate-800/80 shadow-2xl relative overflow-hidden">
         {/* Ambient background glow inside card */}
         <div className="absolute top-[-40%] left-[-40%] w-[80%] h-[80%] bg-brand-cyan/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-        <h1 className="text-2xl font-black text-white relative z-10">Upload Medical Report</h1>
+        <h1 className="text-2xl font-black text-white relative z-10">{t('upload.title')}</h1>
         <p className="text-slate-400 text-sm mt-1 mb-8 relative z-10">
-          Upload PDF, PNG, or JPG lab results for AI data extraction and trend plotting.
+          {t('upload.subtitle')}
         </p>
 
         {uploading ? (
@@ -94,8 +96,8 @@ export default function UploadReport() {
             </div>
             
             <div className="text-center space-y-1">
-              <h3 className="text-slate-200 font-bold text-base">Processing Report</h3>
-              <p className="text-slate-500 text-xs">Please keep this page open. This may take up to a minute.</p>
+              <h3 className="text-slate-200 font-bold text-base">{t('upload.processing')}</h3>
+              <p className="text-slate-500 text-xs">{t('upload.processingSub')}</p>
             </div>
 
             <div className="w-full max-w-md bg-slate-950/60 p-5 rounded-2xl border border-slate-800/50 space-y-4">
@@ -149,12 +151,12 @@ export default function UploadReport() {
                     <FileText className="h-5 w-5" />
                     {file.name}
                   </div>
-                  <p className="text-slate-500 text-xs font-medium">Selected file size: {(file.size / 1024).toFixed(1)} KB</p>
+                  <p className="text-slate-500 text-xs font-medium">{t('upload.selectedSize', { size: (file.size / 1024).toFixed(1) })}</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-slate-200 font-bold text-sm mb-1">Click or drag a file to upload</p>
-                  <p className="text-slate-500 text-xs">PDF, PNG, JPEG up to 10MB</p>
+                  <p className="text-slate-200 font-bold text-sm mb-1">{t('upload.dragIdle')}</p>
+                  <p className="text-slate-500 text-xs">{t('upload.dragFormats')}</p>
                 </div>
               )}
             </div>
@@ -165,7 +167,7 @@ export default function UploadReport() {
                 disabled={!file}
                 className="w-full sm:w-auto bg-gradient-to-r from-brand-indigo to-brand-cyan text-brand-dark font-bold py-3.5 px-8 rounded-xl transition-all duration-300 shadow-lg shadow-brand-cyan/15 hover:shadow-brand-cyan/25 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
               >
-                Upload & Start Analysis
+                {t('upload.uploadBtn')}
               </button>
             </div>
           </form>

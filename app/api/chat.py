@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas import schemas
@@ -12,7 +12,8 @@ router = APIRouter()
 def chat_with_ai(
     req: schemas.ChatMessageCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(deps.get_current_user)
+    current_user: models.User = Depends(deps.get_current_user),
+    accept_language: str = Header("en")
 ):
     # Retrieve chat history
     history = db.query(models.ChatMessage).filter(
@@ -42,7 +43,7 @@ def chat_with_ai(
     db.commit()
     
     # Get AI response
-    ai_response_text = openai_analyzer.chat_with_assistant(history, req.message, report_text)
+    ai_response_text = openai_analyzer.chat_with_assistant(history, req.message, report_text, language=accept_language)
     
     # Save AI response
     ai_msg = models.ChatMessage(

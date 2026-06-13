@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { GitCompare, TrendingUp, TrendingDown, HelpCircle, FileText, Sparkles, AlertCircle, ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
+import { GitCompare, TrendingUp, TrendingDown, HelpCircle, Sparkles, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function Compare() {
   const [reports, setReports] = useState<any[]>([]);
@@ -11,6 +12,7 @@ export default function Compare() {
   const [loading, setLoading] = useState(true);
   const [comparing, setComparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t, language, direction } = useLanguage();
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -19,7 +21,7 @@ export default function Compare() {
         setReports(res.data);
       } catch (err) {
         console.error(err);
-        setError('Failed to fetch reports.');
+        setError(t('common.error'));
       } finally {
         setLoading(false);
       }
@@ -30,11 +32,11 @@ export default function Compare() {
   const handleCompare = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reportId1 || !reportId2) {
-      setError('Please select two reports to compare.');
+      setError(t('compare.infoPrompt'));
       return;
     }
     if (reportId1 === reportId2) {
-      setError('Please select two different reports.');
+      setError(t('compare.sameReportError'));
       return;
     }
 
@@ -50,7 +52,7 @@ export default function Compare() {
       setComparison(res.data);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.detail || 'Failed to compare reports. Please check your API key configuration.');
+      setError(err.response?.data?.detail || t('common.error'));
     } finally {
       setComparing(false);
     }
@@ -60,7 +62,7 @@ export default function Compare() {
     return (
       <div className="flex h-[80vh] items-center justify-center flex-col gap-4">
         <div className="w-12 h-12 border-4 border-slate-800 border-t-brand-cyan rounded-full animate-spin"></div>
-        <div className="text-slate-400 text-sm font-semibold tracking-wider uppercase animate-pulse">Loading reports...</div>
+        <div className="text-slate-400 text-sm font-semibold tracking-wider uppercase animate-pulse">{t('common.loading')}</div>
       </div>
     );
   }
@@ -71,10 +73,10 @@ export default function Compare() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-800/60 pb-6">
         <div className="space-y-1">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-300 text-xs font-semibold uppercase tracking-wider mb-2 group transition-colors">
-            <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" /> Dashboard
+            <ArrowLeft size={12} className={`transition-transform ${direction === 'rtl' ? 'group-hover:translate-x-0.5' : 'group-hover:-translate-x-0.5'}`} /> {t('nav.dashboard')}
           </Link>
-          <h1 className="text-2xl font-black text-white">Compare Medical Reports</h1>
-          <p className="text-slate-400 text-xs font-medium">Compare health metrics and track biomarker progress over time.</p>
+          <h1 className="text-2xl font-black text-white">{t('compare.title')}</h1>
+          <p className="text-slate-400 text-xs font-medium">{t('compare.subtitle')}</p>
         </div>
       </div>
 
@@ -92,16 +94,16 @@ export default function Compare() {
         <form onSubmit={handleCompare} className="grid grid-cols-1 md:grid-cols-3 items-end gap-6 relative z-10">
           {/* Report 1 Selection */}
           <div className="space-y-2">
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider">First Report (Older)</label>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider">{t('compare.olderLabel')}</label>
             <select
               value={reportId1}
               onChange={(e) => setReportId1(e.target.value)}
               className="w-full bg-brand-dark border border-slate-800 rounded-xl px-4 py-3 text-slate-200 text-sm focus:border-brand-indigo/80 focus:ring-1 focus:ring-brand-indigo outline-none transition-all"
             >
-              <option value="">Select a report...</option>
+              <option value="">{t('compare.selectPlaceholder')}</option>
               {reports.map((report) => (
                 <option key={report.id} value={report.id}>
-                  {report.filename} ({new Date(report.uploaded_at).toLocaleDateString()})
+                  {report.filename} ({new Date(report.uploaded_at).toLocaleDateString(language)})
                 </option>
               ))}
             </select>
@@ -114,16 +116,16 @@ export default function Compare() {
 
           {/* Report 2 Selection */}
           <div className="space-y-2">
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider">Second Report (Newer)</label>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider">{t('compare.newerLabel')}</label>
             <select
               value={reportId2}
               onChange={(e) => setReportId2(e.target.value)}
               className="w-full bg-brand-dark border border-slate-800 rounded-xl px-4 py-3 text-slate-200 text-sm focus:border-brand-cyan/85 focus:ring-1 focus:ring-brand-cyan outline-none transition-all"
             >
-              <option value="">Select a report...</option>
+              <option value="">{t('compare.selectPlaceholder')}</option>
               {reports.map((report) => (
                 <option key={report.id} value={report.id}>
-                  {report.filename} ({new Date(report.uploaded_at).toLocaleDateString()})
+                  {report.filename} ({new Date(report.uploaded_at).toLocaleDateString(language)})
                 </option>
               ))}
             </select>
@@ -139,12 +141,12 @@ export default function Compare() {
               {comparing ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  Generating AI Comparison...
+                  {t('compare.comparingBtn')}
                 </>
               ) : (
                 <>
                   <GitCompare size={16} />
-                  Compare Reports
+                  {t('compare.compareBtn')}
                 </>
               )}
             </button>
@@ -160,8 +162,8 @@ export default function Compare() {
             <Sparkles size={20} className="absolute text-brand-indigo animate-pulse" />
           </div>
           <div className="space-y-1.5">
-            <h3 className="text-slate-200 font-bold text-base">Analyzing Health Trends</h3>
-            <p className="text-slate-500 text-xs">AI is fetching biomarkers, evaluating changes, and synthesizing progress summary...</p>
+            <h3 className="text-slate-200 font-bold text-base">{t('compare.comparingBtn')}</h3>
+            <p className="text-slate-500 text-xs">{t('upload.processingSub')}</p>
           </div>
         </div>
       )}
@@ -176,7 +178,7 @@ export default function Compare() {
               <div className="bg-brand-indigo/15 p-2 rounded-xl text-brand-indigo">
                 <Sparkles className="h-5 w-5 animate-pulse" />
               </div>
-              <h2 className="text-lg font-bold text-white">AI Health Progression Summary</h2>
+              <h2 className="text-lg font-bold text-white">{t('compare.aiSummary')}</h2>
             </div>
             <p className="text-slate-300 text-sm leading-relaxed relative z-10 whitespace-pre-line">
               {comparison.ai_summary}
@@ -191,7 +193,7 @@ export default function Compare() {
                 <div className="bg-brand-rose/10 p-1.5 rounded-lg text-brand-rose">
                   <TrendingDown className="h-4.5 w-4.5" />
                 </div>
-                <h3 className="text-sm font-bold text-white">Worsened / Needs Attention</h3>
+                <h3 className="text-sm font-bold text-white">{t('compare.worsened')}</h3>
               </div>
               <div className="flex-1 space-y-2">
                 {comparison.worsened_metrics && comparison.worsened_metrics.length > 0 ? (
@@ -202,7 +204,7 @@ export default function Compare() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-slate-500 text-xs py-6 text-center">No metrics worsened. Great job!</div>
+                  <div className="text-slate-500 text-xs py-6 text-center">{t('compare.emptyMetrics')}</div>
                 )}
               </div>
             </div>
@@ -213,7 +215,7 @@ export default function Compare() {
                 <div className="bg-brand-emerald/10 p-1.5 rounded-lg text-brand-emerald">
                   <TrendingUp className="h-4.5 w-4.5" />
                 </div>
-                <h3 className="text-sm font-bold text-white">Improved Metrics</h3>
+                <h3 className="text-sm font-bold text-white">{t('compare.improved')}</h3>
               </div>
               <div className="flex-1 space-y-2">
                 {comparison.improved_metrics && comparison.improved_metrics.length > 0 ? (
@@ -224,7 +226,7 @@ export default function Compare() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-slate-500 text-xs py-6 text-center">No major metric improvements detected.</div>
+                  <div className="text-slate-500 text-xs py-6 text-center">{t('compare.emptyMetrics')}</div>
                 )}
               </div>
             </div>
@@ -235,7 +237,7 @@ export default function Compare() {
                 <div className="bg-brand-cyan/10 p-1.5 rounded-lg text-brand-cyan">
                   <HelpCircle className="h-4.5 w-4.5" />
                 </div>
-                <h3 className="text-sm font-bold text-white">Stable Metrics</h3>
+                <h3 className="text-sm font-bold text-white">{t('compare.stable')}</h3>
               </div>
               <div className="flex-1 space-y-2">
                 {comparison.stable_metrics && comparison.stable_metrics.length > 0 ? (
@@ -246,7 +248,7 @@ export default function Compare() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-slate-500 text-xs py-6 text-center">No stable metrics listed.</div>
+                  <div className="text-slate-500 text-xs py-6 text-center">{t('compare.emptyMetrics')}</div>
                 )}
               </div>
             </div>

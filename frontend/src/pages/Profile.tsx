@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { User, Mail, ShieldCheck, Heart } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function Profile() {
   const [user, setUser] = useState<any>(null);
+  const { t, language, direction } = useLanguage();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -21,7 +23,7 @@ export default function Profile() {
     return (
       <div className="flex h-[80vh] items-center justify-center flex-col gap-4">
         <div className="w-12 h-12 border-4 border-slate-800 border-t-brand-cyan rounded-full animate-spin"></div>
-        <div className="text-slate-400 text-sm font-semibold tracking-wider uppercase animate-pulse">Retrieving Profile...</div>
+        <div className="text-slate-400 text-sm font-semibold tracking-wider uppercase animate-pulse">{t('common.loading')}</div>
       </div>
     );
   }
@@ -39,10 +41,10 @@ export default function Profile() {
               <User className="h-10 w-10" />
             </div>
           </div>
-          <div className="text-center sm:text-left space-y-1">
+          <div className="text-center sm:text-start space-y-1">
             <h1 className="text-2xl font-black text-white tracking-tight">{user.name}</h1>
             <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-              <ShieldCheck size={14} className="text-brand-cyan" /> Verified Medical Profile
+              <ShieldCheck size={14} className="text-brand-cyan" /> {t('profile.title')}
             </div>
           </div>
         </div>
@@ -56,7 +58,7 @@ export default function Profile() {
                 <User className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Account Holder</div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{t('auth.fullName')}</div>
                 <div className="text-sm font-semibold text-slate-200 mt-0.5">{user.name}</div>
               </div>
             </div>
@@ -67,7 +69,7 @@ export default function Profile() {
                 <Mail className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Registered Email</div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{t('profile.email')}</div>
                 <div className="text-sm font-semibold text-slate-200 mt-0.5">{user.email}</div>
               </div>
             </div>
@@ -76,10 +78,10 @@ export default function Profile() {
           <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500 font-semibold">
             <div className="flex items-center gap-1.5">
               <Heart size={14} className="text-brand-rose animate-pulse" />
-              <span>Diagnostic System Status: Secure & Active</span>
+              <span>{t('profile.subtitle')}</span>
             </div>
             <div>
-              Registered: {new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+              {t('profile.joined')}: {new Date(user.created_at).toLocaleDateString(language, { year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
           </div>
         </div>

@@ -24,6 +24,14 @@
     font-family: 'Plus Jakarta Sans', sans-serif;
   }
 
+  html[dir="rtl"] {
+    --font-sans: 'Vazirmatn', sans-serif;
+  }
+
+  html[dir="rtl"] body {
+    font-family: 'Vazirmatn', sans-serif;
+  }
+
   /* Custom glass scrollbar */
   ::-webkit-scrollbar {
     width: 6px;

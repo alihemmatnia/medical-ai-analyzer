@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
-import { Send, User as UserIcon, Bot, MessageSquare, ShieldAlert, FileText } from 'lucide-react';
+import { Send, User as UserIcon, Bot, MessageSquare, FileText } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function Chat() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -12,7 +13,8 @@ export default function Chat() {
   const [selectedReportId, setSelectedReportId] = useState<string>(initialReportId);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const { t, language, direction } = useLanguage();
 
   // Fetch reports list on mount
   useEffect(() => {
@@ -42,7 +44,12 @@ export default function Chat() {
   }, [selectedReportId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages]);
 
   const handleSend = async (e: React.FormEvent) => {
@@ -69,7 +76,7 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-7rem)] glass-card rounded-2xl border border-slate-800/80 max-w-4xl mx-auto overflow-hidden shadow-2xl animate-fade-in">
+    <div className="flex flex-col h-full glass-card rounded-2xl border border-slate-800/80 max-w-4xl mx-auto overflow-hidden shadow-2xl animate-fade-in">
       {/* Chat header */}
       <div className="p-5 border-b border-slate-800/60 bg-slate-900/40 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div className="flex items-center gap-3">
@@ -78,20 +85,20 @@ export default function Chat() {
           </div>
           <div>
             <h1 className="text-sm font-bold text-white flex items-center gap-1.5">
-              AI Medical Assistant 
+              {t('chat.title')} 
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-emerald opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-emerald"></span>
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400 mt-0.5">Discuss your clinical reports and clarify biomarkers</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">{t('chat.subtitle')}</p>
           </div>
         </div>
 
         {/* Report context selector */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <FileText size={14} className="text-slate-400" />
-          <span className="text-xs text-slate-400 font-semibold">Context:</span>
+          <span className="text-xs text-slate-400 font-semibold">{t('chat.contextLabel')}:</span>
           <select
             value={selectedReportId}
             onChange={(e) => {
@@ -100,10 +107,10 @@ export default function Chat() {
             }}
             className="bg-brand-dark border border-slate-800 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:border-brand-cyan focus:outline-none transition-all cursor-pointer"
           >
-            <option value="">General Consultation (No Report)</option>
+            <option value="">{t('chat.allReports')}</option>
             {reports.map((report) => (
               <option key={report.id} value={report.id}>
-                {report.filename} ({new Date(report.uploaded_at).toLocaleDateString()})
+                {report.filename} ({new Date(report.uploaded_at).toLocaleDateString(language)})
               </option>
             ))}
           </select>
@@ -111,25 +118,25 @@ export default function Chat() {
       </div>
 
       {/* Messages Pane */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-brand-dark/20">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-brand-dark/20">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-4 max-w-sm mx-auto">
             <div className="bg-slate-900/50 p-4 rounded-full border border-slate-800 text-slate-500">
               <MessageSquare size={28} />
             </div>
             <div className="space-y-1">
-              <h3 className="text-slate-300 text-sm font-bold">Start Consultation</h3>
+              <h3 className="text-slate-300 text-sm font-bold">{t('chat.title')}</h3>
               <p className="text-slate-500 text-xs leading-relaxed">
                 {selectedReportId 
-                  ? "Ask specific questions about this medical report. The AI has access to its full contents."
-                  : "Ask simple questions like: \"What does my high cholesterol mean?\" or select a report context above to discuss its findings."}
+                  ? t('chat.placeholder')
+                  : t('chat.placeholder')}
               </p>
             </div>
           </div>
         )}
         
         {messages.map((msg, idx) => (
-          <div key={idx} className={`flex gap-3.5 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
+          <div key={idx} className={`flex gap-3.5 max-w-[85%] ${msg.role === 'user' ? (direction === 'rtl' ? 'mr-auto flex-row-reverse' : 'ml-auto flex-row-reverse') : ''}`}>
             <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border shadow-md ${
               msg.role === 'user' 
                 ? 'bg-slate-900 border-slate-850 text-brand-cyan' 
@@ -140,8 +147,8 @@ export default function Chat() {
             
             <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-md ${
               msg.role === 'user' 
-                ? 'bg-gradient-to-tr from-brand-indigo to-brand-cyan text-brand-dark font-medium rounded-tr-none' 
-                : 'bg-slate-900/50 border border-slate-800/60 text-slate-200 rounded-tl-none'
+                ? `bg-gradient-to-tr from-brand-indigo to-brand-cyan text-brand-dark font-medium ${direction === 'rtl' ? 'rounded-tl-none' : 'rounded-tr-none'}` 
+                : `bg-slate-900/50 border border-slate-800/60 text-slate-200 ${direction === 'rtl' ? 'rounded-tr-none' : 'rounded-tl-none'}`
             }`}>
               {msg.message}
             </div>
@@ -153,14 +160,14 @@ export default function Chat() {
             <div className="h-9 w-9 rounded-xl bg-brand-indigo/15 border border-brand-indigo/20 text-brand-indigo flex items-center justify-center shrink-0">
               <Bot size={16} />
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/60 rounded-tl-none flex items-center gap-1.5">
+            <div className={`p-4 rounded-2xl bg-slate-900/50 border border-slate-800/60 flex items-center gap-1.5 ${direction === 'rtl' ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
               <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full animate-bounce"></span>
               <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full animate-bounce delay-75"></span>
               <span className="w-1.5 h-1.5 bg-brand-cyan rounded-full animate-bounce delay-150"></span>
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
+        {/* Scroll anchor removed in favor of direct container scrollTop manipulation */}
       </div>
 
       {/* Input Tray */}
@@ -169,7 +176,7 @@ export default function Chat() {
           <input
             type="text"
             className="flex-1 px-5 py-3.5 bg-brand-navy/60 border border-slate-850 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent text-slate-100 placeholder-slate-500 transition-all text-sm"
-            placeholder={selectedReportId ? "Ask about this report..." : "Ask a medical query..."}
+            placeholder={t('chat.placeholder')}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}

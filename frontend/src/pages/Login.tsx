@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { Activity, Mail, Lock } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t, direction } = useLanguage();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +25,7 @@ export default function Login() {
       localStorage.setItem('token', res.data.access_token);
       navigate('/');
     } catch (err) {
-      setError('Invalid email or password');
+      setError(t('auth.errorInvalid', { defaultValue: 'Invalid email or password' }));
     } finally {
       setLoading(false);
     }
@@ -41,10 +43,10 @@ export default function Login() {
             <Activity className="h-8 w-8 text-brand-dark" />
           </div>
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-brand-cyan tracking-tight">
-            Welcome to MedAI
+            {t('auth.signInTitle')}
           </h1>
           <p className="text-slate-400 mt-1.5 text-xs text-center">
-            Sign in to analyze medical reports and chat with the AI assistant.
+            {t('auth.signInSub')}
           </p>
         </div>
         
@@ -56,12 +58,12 @@ export default function Login() {
         
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Email Address</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{t('auth.email')}</label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
+              <Mail className={`absolute ${direction === 'rtl' ? 'right-3.5' : 'left-3.5'} top-3.5 h-5 w-5 text-slate-500`} />
               <input 
                 type="email" 
-                className="w-full pl-11 pr-4 py-3 bg-brand-navy/60 border border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent text-slate-100 placeholder-slate-500 transition-all text-sm"
+                className="w-full ps-11 pe-4 py-3 bg-brand-navy/60 border border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent text-slate-100 placeholder-slate-500 transition-all text-sm"
                 placeholder="name@domain.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -70,12 +72,12 @@ export default function Login() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Password</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">{t('auth.password')}</label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
+              <Lock className={`absolute ${direction === 'rtl' ? 'right-3.5' : 'left-3.5'} top-3.5 h-5 w-5 text-slate-500`} />
               <input 
                 type="password" 
-                className="w-full pl-11 pr-4 py-3 bg-brand-navy/60 border border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent text-slate-100 placeholder-slate-500 transition-all text-sm"
+                className="w-full ps-11 pe-4 py-3 bg-brand-navy/60 border border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent text-slate-100 placeholder-slate-500 transition-all text-sm"
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -92,13 +94,13 @@ export default function Login() {
             {loading ? (
               <span className="w-5 h-5 border-2 border-brand-dark border-t-transparent rounded-full animate-spin"></span>
             ) : (
-              'Sign In'
+              t('auth.signInBtn')
             )}
           </button>
         </form>
         
         <div className="mt-8 text-center text-xs text-slate-400">
-          New to MedAI? <Link to="/register" className="text-brand-cyan hover:underline font-semibold">Create an account</Link>
+          {t('auth.noAccount')} <Link to="/register" className="text-brand-cyan hover:underline font-semibold">{t('auth.createAccount')}</Link>
         </div>
       </div>
     </div>
